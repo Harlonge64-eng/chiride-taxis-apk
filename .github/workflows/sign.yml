@@ -1,0 +1,30 @@
+name: Sign APK
+
+on:
+  workflow_dispatch:   # lets you run the workflow manually
+  push:
+    tags: [ "v*" ]
+
+jobs:
+  sign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Download unsigned APK
+        run: |
+          # Replace the URL below with the raw URL of your unsigned APK
+          curl -L https://raw.githubusercontent.com/Harlonge64-eng/chiride-taxis-apk/main/_Chiride_Taxis_Apk.apk -o unsigned.apk
+      - name: Sign APK
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: .
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: chiride
+          keyStorePassword: android
+          keyPassword: android
+      - name: Upload signed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ChirideTaxis-signed
+          path: unsigned-signed.apk
