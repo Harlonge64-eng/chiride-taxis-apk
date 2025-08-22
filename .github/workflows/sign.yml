@@ -1,6 +1,6 @@
 name: Sign APK
 on:
-  workflow_dispatch:   # manual run button
+  workflow_dispatch:   # manual run
   push:
     tags: [ "v*" ]
 
@@ -11,24 +11,30 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # Download the APK that is already in your repo
-      - name: Fetch APK
+      - name: Download APK
         run: |
           curl -L \
           https://github.com/Harlonge64-eng/chiride-taxis-apk/releases/download/v1.0.0/_Chiride_Taxis_Apk.apk \
           -o unsigned.apk
 
-      - name: Sign APK
-        uses: r0adkll/sign-android-release@v1
+      - name: Set up Java
+        uses: actions/setup-java@v4
         with:
-          releaseDirectory: .
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: chiride
-          keyStorePassword: android
-          keyPassword: android
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Sign APK
+        run: |
+          # fetch the lightweight signer
+          curl -L https://github.com/topjohnwu/signapk/releases/download/1.0/signapk.jar -o signapk.jar
+          # create test keys locally
+          openssl genrsa -out key.pk8 2048
+          openssl req -new -x509 -key key.pk8 -out cert.pem -subj "/CN=chiride" -days 3650
+          # sign
+          java -jar signapk.jar cert.pem key.pk8 unsigned.apk signed.apk
 
       - name: Upload signed artifact
         uses: actions/upload-artifact@v4
         with:
           name: ChirideTaxis-signed
-          path: unsigned-signed.apk
+          path: signed.apk
