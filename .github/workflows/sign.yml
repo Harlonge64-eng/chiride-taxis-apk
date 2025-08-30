@@ -1,20 +1,8 @@
-name: Sign release APK
-
-on:
-  workflow_dispatch:          # manual button
-  push:
-    tags: [ 'v*' ]
-
-jobs:
-  sign:
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 17
+      - name: Make gradlew executable
+        run: chmod +x gradlew
 
       - name: Decode keystore
         run: echo "${{ secrets.KEYSTORE_B64 }}" | base64 -d > keystore.jks
