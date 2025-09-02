@@ -30,6 +30,9 @@ jobs:
         run: |
           echo "${{ secrets.SIGNING_KEYSTORE_B64 }}" | base64 -d > keystore.jks
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Assemble & Sign APK
         run: ./gradlew assembleRelease
         env:
